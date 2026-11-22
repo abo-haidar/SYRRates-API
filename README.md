@@ -180,7 +180,3 @@ Use the HTTP status first, then `error.code` for application-specific handling. 
 - [التوثيق بالعربية](https://api.exchanger.sy/ar/docs)
 - [Developer console](https://api.exchanger.sy/console?lang=en)
 - [Telegram support](https://t.me/api365)
-
-- [التوثيق بالعربية](https://api.exchanger.sy/ar/docs)
-- [Developer console](https://api.exchanger.sy/console?lang=en)
-- [Telegram support](https://t.me/api365)
