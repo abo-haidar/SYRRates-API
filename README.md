@@ -1,14 +1,28 @@
-# SYRRates-API
+# SYRRates-API | Exchanger API
 
-Read exchange rates against the Syrian pound in Damascus, gold prices, and Syrian energy prices from a read-only JSON API.
+Exchange rates against the Syrian pound, available through a clear, read-only JSON API. Exchanger API provides Damascus currency rates, gold karat prices, and selected energy prices in one interface for websites, applications, and data services.
 
-**Base URL:** `https://api.exchanger.sy` · [Website](https://api.exchanger.sy/en) · [Arabic website](https://api.exchanger.sy/ar) · [Online docs](https://api.exchanger.sy/en/docs)
+**Base URL:** `https://api.exchanger.sy`  
+**Website:** [English](https://api.exchanger.sy/en) · [العربية](https://api.exchanger.sy/ar)  
+**Full documentation:** [api.exchanger.sy/en/docs](https://api.exchanger.sy/en/docs)
 
-## Get a free key
+## What you can access
 
-Message the developer on Telegram at [@api365](https://t.me/api365) and mention your app or website. Requesting a key is free. Keep the secret on your server or in an environment variable. Never publish it in a repository or browser JavaScript.
+- Currency buy and sell rates against the Syrian pound, including a single currency by code or the complete available list.
+- Gold buy and sell prices by karat.
+- Energy prices in both Syrian pounds and US dollars.
+- Historical changes for a currency or gold karat, with a date range and pagination.
+- A combined endpoint for the currently available currency, gold, and energy data.
 
-Every API request requires one of these headers:
+The website presents a small selection of rates. The API provides the full set of currently visible and priced items. The available currency and gold codes may change; use their collection endpoints or the [live code list](https://api.exchanger.sy/en/docs#available) to discover them.
+
+## Get an API key
+
+**A free API key is available to everyone.** Open the [developer console](https://api.exchanger.sy/console?lang=en), sign in with Telegram, and create a key under the free plan. The console also shows your key status, usage, and available plans. For assistance, contact [@api365 on Telegram](https://t.me/api365).
+
+Your secret key is displayed once when created or rotated. Store it in a server-side environment variable or secret manager. Do not place it in a public repository, browser code, or a URL.
+
+Send the key in either HTTP header:
 
 ```http
 X-API-Key: syp_YOUR_KEY
@@ -18,85 +32,32 @@ X-API-Key: syp_YOUR_KEY
 Authorization: Bearer syp_YOUR_KEY
 ```
 
-The examples use `SYR_API_KEY`; `SYR_API_URL` is optional and defaults to `https://api.exchanger.sy`.
+All endpoints below use HTTPS `GET` and return JSON. For example:
 
 ```bash
-export SYR_API_KEY='syp_YOUR_KEY'
+curl 'https://api.exchanger.sy/api/v1/currencies/USD' \
+  -H 'X-API-Key: syp_YOUR_KEY' \
+  -H 'Accept: application/json'
 ```
 
-In PowerShell: `$env:SYR_API_KEY = 'syp_YOUR_KEY'`. Avoid putting a real key in shared command history or logs.
+## Endpoints
 
-## Quick start
-
-```bash
-curl --get 'https://api.exchanger.sy/api/v1/currencies/USD' \
-  -H "X-API-Key: $SYR_API_KEY" -H 'Accept: application/json'
-```
-
-The equivalent Bearer form is:
-
-```bash
-curl -H "Authorization: Bearer $SYR_API_KEY" \
-  -H 'Accept: application/json' \
-  'https://api.exchanger.sy/api/v1/currencies/USD'
-```
-
-Add `-i` to either cURL command when you need to inspect HTTP status and rate-limit headers. The runnable cURL script below includes headers by default.
-
-All API endpoints use HTTPS `GET` and return JSON. A successful response has `data` and `meta`. A single-item endpoint returns an object in `data`; a collection returns an array. `/rates` returns an object containing three arrays.
-
-## Endpoints and examples
-
-| Path | Result |
+| Endpoint | Description |
 | --- | --- |
-| `/api/v1/rates` | Available currencies, gold karats, and energy items together |
-| `/api/v1/currencies` | All available currencies |
-| `/api/v1/currencies/{CODE}` | One currency, for example `USD` |
-| `/api/v1/gold` | All available gold karats |
-| `/api/v1/gold/{KARAT}` | One karat, for example `21K` |
-| `/api/v1/energy` | All available energy items |
-| `/api/v1/energy/{CODE}` | One energy item, for example `GAS95` |
-| `/api/v1/history` | Accepted changes for one currency or gold karat |
+| `GET /api/v1/rates` | Currencies, gold karats, and energy items in one response |
+| `GET /api/v1/currencies` | All available currencies |
+| `GET /api/v1/currencies/{CODE}` | One currency, such as `USD` |
+| `GET /api/v1/gold` | All available gold karats |
+| `GET /api/v1/gold/{KARAT}` | One karat, such as `21K` |
+| `GET /api/v1/energy` | All available energy items |
+| `GET /api/v1/energy/{CODE}` | One energy item, such as `GAS95` |
+| `GET /api/v1/history` | Accepted changes for one currency or gold karat |
 
-```bash
-# Everything in one response
-curl -H "X-API-Key: $SYR_API_KEY" 'https://api.exchanger.sy/api/v1/rates'
+Collection endpoints return arrays in `data`. A single-item endpoint returns an object. The combined `/rates` endpoint returns a `data` object with `currencies`, `gold`, and `energy` arrays. A hidden item is not listed; a request for its code returns `404`.
 
-# Currency collection and one item
-curl -H "X-API-Key: $SYR_API_KEY" 'https://api.exchanger.sy/api/v1/currencies'
-curl -H "X-API-Key: $SYR_API_KEY" 'https://api.exchanger.sy/api/v1/currencies/USD'
+### Response format
 
-# Gold collection and one karat
-curl -H "X-API-Key: $SYR_API_KEY" 'https://api.exchanger.sy/api/v1/gold'
-curl -H "X-API-Key: $SYR_API_KEY" 'https://api.exchanger.sy/api/v1/gold/21K'
-
-# Energy collection and one item
-curl -H "X-API-Key: $SYR_API_KEY" 'https://api.exchanger.sy/api/v1/energy'
-curl -H "X-API-Key: $SYR_API_KEY" 'https://api.exchanger.sy/api/v1/energy/GAS95'
-```
-
-Available currency and gold codes can change. Read the collection endpoint or the [live code list](https://api.exchanger.sy/en/docs#available) before relying on a code. Hidden or unpriced items do not appear in collections. A known hidden code returns `404` on a single-item path. Currency, gold, and energy single-item paths accept lowercase letters too.
-
-### Combined response
-
-`GET /api/v1/rates` returns this envelope. Values below are abbreviated examples, not current prices.
-
-```json
-{
-  "data": {
-    "currencies": [{"type": "currency", "code": "USD", "buy": "13725.000000", "sell": "13800.000000"}],
-    "gold": [{"type": "gold", "code": "21K", "buy": "...", "sell": "..."}],
-    "energy": [{"type": "energy", "code": "GAS95", "price_syp": "...", "price_usd": "..."}]
-  },
-  "meta": {"denomination": "old", "round": 6, "timestamp_unit": "unix_seconds"}
-}
-```
-
-The actual items include all fields shown below. `energy` can be empty if energy prices or the USD conversion rate are unavailable. A `503` is returned if no category has an available price.
-
-### Currency and gold item fields
-
-`GET /api/v1/currencies/USD` returns one object like this. Gold items use the same fields with `"type": "gold"` and a karat code such as `21K`.
+A currency response has this structure. Values shown here illustrate the format and are **not current prices**.
 
 ```json
 {
@@ -114,13 +75,19 @@ The actual items include all fields shown below. `energy` can be empty if energy
     "status": "fresh",
     "fallback_reason": null
   },
-  "meta": {"denomination": "old", "round": 6, "timestamp_unit": "unix_seconds"}
+  "meta": {
+    "denomination": "old",
+    "round": 6,
+    "timestamp_unit": "unix_seconds"
+  }
 }
 ```
 
-`buy` and `sell` are decimal **strings**; use a decimal type for calculations. `status` is `fresh` or `cached`. A cached item retains its last accepted price, and `fallback_reason` may identify why. `accepted_at` is the last accepted price time. Time fields can be `null`. Collection endpoints return arrays of these objects.
+Gold items use the same price fields with `"type": "gold"`. `buy` and `sell` are decimal **strings**, so applications should parse them with a decimal type where exact arithmetic matters. `status` can be `fresh` or `cached`; a cached item retains its last accepted price. `accepted_at` identifies when that price was accepted. A time field can be `null` when no time is available.
 
-### Energy items
+### Energy prices
+
+Energy prices are shown as `price_syp` and `price_usd` decimal strings, with a `unit` and an `updated_at` timestamp. USD conversion uses the available USD sell rate. An energy item is returned only when it has a visible price; the energy endpoints require a USD rate to provide both currencies.
 
 | Code | Item | Unit |
 | --- | --- | --- |
@@ -132,124 +99,59 @@ The actual items include all fields shown below. `energy` can be empty if energy
 | `HOME_GT300` | Residential electricity above 300 kWh | kWh |
 | `INDUSTRIAL` | Industrial electricity | kWh |
 
-An energy item appears only after a price is set and it is visible. `GET /api/v1/energy/GAS95` returns this shape (illustrative values):
+### Historical changes
 
-```json
-{
-  "data": {
-    "type": "energy",
-    "code": "GAS95",
-    "name": {"ar": "بنزين 95", "en": "Gasoline 95"},
-    "unit": "liter",
-    "price_syp": "15000.000000",
-    "price_usd": "1.086957",
-    "updated_at": 1790513110
-  },
-  "meta": {
-    "usd_sell_old_syp": "13800.000000",
-    "denomination": "old",
-    "round": 6,
-    "timestamp_unit": "unix_seconds"
-  }
-}
-```
+`/api/v1/history` covers currencies and gold karats. It returns accepted price changes in newest-first order. Supply all four required parameters:
 
-`price_syp` and `price_usd` are decimal strings. USD conversion uses the available USD **sell** rate. `usd_sell_old_syp` is that rate in old SYP units. Energy has no `buy` or `sell`. Combined `/rates` does not include `usd_sell_old_syp` in its `meta`.
-
-### Price history
-
-History is for `currency` and `gold`, not energy. All four main parameters are required:
-
-| Parameter | Value |
+| Parameter | Description |
 | --- | --- |
 | `type` | `currency` or `gold` |
-| `code` | Item code, such as `USD` or `21K` |
-| `from` | ISO 8601 timestamp with time zone, such as `2026-09-01T00:00:00Z` |
-| `to` | ISO 8601 timestamp with time zone |
-| `page` | Optional, default `1`, maximum `10000` |
-| `per_page` | Optional, default `50`, maximum `100` |
+| `code` | An item code such as `USD` or `21K` |
+| `from` | ISO 8601 timestamp with a time zone |
+| `to` | ISO 8601 timestamp with a time zone |
+| `page` | Optional; defaults to `1`, maximum `10000` |
+| `per_page` | Optional; defaults to `50`, maximum `100` |
 
-The inclusive time range must be valid and at most **31 days**. Results are newest first and contain accepted price changes only.
+The inclusive range must be no longer than **31 days**. The response includes `meta.total`, `meta.page`, and `meta.per_page` for pagination. An empty `data` array is a successful result when the item has no changes in that range. Energy history is not available.
 
-```bash
-curl --get 'https://api.exchanger.sy/api/v1/history' \
-  -H "X-API-Key: $SYR_API_KEY" \
-  --data-urlencode 'type=currency' --data-urlencode 'code=USD' \
-  --data-urlencode 'from=2026-09-01T00:00:00Z' \
-  --data-urlencode 'to=2026-09-30T00:00:00Z' \
-  --data-urlencode 'page=1' --data-urlencode 'per_page=50'
+```text
+GET /api/v1/history?type=currency&code=USD&from=2026-09-01T00:00:00Z&to=2026-09-30T00:00:00Z&page=1&per_page=50
 ```
+
+## Display units and timestamps
+
+The service administrator sets the display denomination and decimal precision for all clients. `meta.denomination` is `old` or `new`; **one new SYP equals 100 old SYP**. `meta.round` indicates the number of decimal places, from `0` to `6`. Request parameters named `denomination` or `round` are not supported.
+
+Response timestamps are Unix **seconds** in UTC, or `null`. Convert them to the user's preferred time zone in your application. History request parameters `from` and `to` remain ISO 8601 timestamps.
+
+## Usage limits and errors
+
+A key may have a start time, expiry, total request allowance, and independent minute, hour, and day limits. A plan can also allow unlimited duration, requests, or both. The [key usage page](https://api.exchanger.sy/en/usage) shows status and remaining allowance without consuming API quota; submit the key through its form, never in a URL.
+
+When a limit applies, responses include `X-RateLimit-Limit` and `X-RateLimit-Remaining`. A timed limit also includes `X-RateLimit-Reset` as Unix seconds. If a limit is reached, the API returns `429`; timed limits include `Retry-After` in seconds. Unlimited keys may have no rate-limit headers.
+
+| HTTP | Meaning |
+| --- | --- |
+| `400` | Invalid query parameters |
+| `401` | Missing or invalid API key |
+| `403` | Disabled, not-yet-active, or expired key |
+| `404` | Unknown endpoint or item |
+| `405` | Unsupported HTTP method |
+| `429` | Request allowance reached |
+| `500` | Internal processing error |
+| `503` | Required price data is not available |
+
+Errors use a consistent JSON envelope:
 
 ```json
-{
-  "data": [
-    {"buy": "13725.000000", "sell": "13800.000000", "metrics": {}, "source_updated_at": 1790513102, "accepted_at": 1790513110}
-  ],
-  "meta": {"type": "currency", "code": "USD", "page": 1, "per_page": 50, "total": 1, "denomination": "old", "round": 6, "timestamp_unit": "unix_seconds"}
-}
-```
-
-These numbers are illustrative. An empty `data` array with `total: 0` is a successful result for an item without changes in the range. Paginate using `meta.total`, `meta.page`, and `meta.per_page`.
-
-## Display units and time zones
-
-The service administrator chooses `meta.denomination` (`old` or `new`) and `meta.round` (decimal places, `0`–`6`) for **all** clients. New SYP equals old SYP divided by 100. Query parameters `denomination` and `round` are not supported and return `400`.
-
-Response timestamps are Unix **seconds** in UTC, or `null`. Convert them to your user's time zone. History *request* parameters `from` and `to` remain ISO 8601 strings.
-
-```python
-from datetime import datetime, timezone
-print(datetime.fromtimestamp(1790513110, timezone.utc).isoformat())
-```
-
-## Limits, errors, and key usage
-
-Keys may have a start time, expiry time, total allowance, minute/hour/day limits, or no limits. A valid authenticated request consumes one request even if it returns `400`, `404`, or `503`. Requests rejected for an invalid/inactive key or exhausted quota do not consume an allowance.
-
-When a limit is configured, responses include `X-RateLimit-Limit` and `X-RateLimit-Remaining`. Timed limits also include `X-RateLimit-Reset` (Unix seconds). On `429`, a timed limit adds `Retry-After` (seconds). These headers describe one applicable limit, not every configured limit. Unlimited keys may have no rate-limit headers.
-
-```http
-HTTP/1.1 429 Too Many Requests
-X-RateLimit-Limit: 60
-X-RateLimit-Remaining: 0
-X-RateLimit-Reset: 1790513160
-Retry-After: 18
-
 {"error":{"code":"quota_exceeded","message":"API key request limit exceeded"}}
 ```
 
-| HTTP | Meaning | Typical `error.code` |
-| --- | --- | --- |
-| `400` | Invalid parameters or display override | `bad_request` |
-| `401` | Missing or invalid key | `invalid_key` |
-| `403` | Disabled, not-yet-active, or expired key | `key_inactive` |
-| `404` | Unknown endpoint or item | `not_found` |
-| `405` | Method other than GET | `method_not_allowed` |
-| `429` | Allowance reached | `quota_exceeded` |
-| `500` | Internal processing failure | `server_error` |
-| `503` | Required prices or service unavailable | `no_prices`, `no_usd_rate`, or `service_unavailable` |
+Use the HTTP status first, then `error.code` for application-specific handling. A valid authenticated request counts toward the key's allowance even if the requested path or parameters produce an error. Invalid or inactive keys and quota-rejected requests do not consume the allowance.
 
-Errors have an `error` object with `code` and `message`, for example `{"error":{"code":"not_found","message":"Instrument not found"}}`. Handle HTTP status first, then `error.code`. On `429`, wait for `Retry-After` when present.
+## Further information
 
-Check your key at the [protected usage page](https://api.exchanger.sy/en/usage). Enter it into the form, not a URL. The check does not consume API quota. The page shows status, remaining total allowance, minute/hour/day windows, and recorded errors.
-
-## Runnable examples
-
-- [cURL shell script](examples/curl.sh): POSIX shell and cURL.
-- [PHP example](examples/example.php): PHP 8.1+ with cURL.
-- [Python example](examples/example.py): Python 3.8+ standard library.
-
-After setting `SYR_API_KEY`, use the same command names with `php`, `python3`, or `sh`:
-
-```bash
-php examples/example.php rates
-php examples/example.php currencies
-php examples/example.php currency USD
-php examples/example.php gold
-php examples/example.php gold-item 21K
-php examples/example.php energy
-php examples/example.php energy-item GAS95
-php examples/example.php history currency USD 2026-09-01T00:00:00Z 2026-09-30T00:00:00Z 1 50
-```
-
-Use `python3 examples/example.py ...` or `sh examples/curl.sh ...` with the same arguments. The dates above are examples; choose a relevant 31-day range for your history query.
+- [English API documentation](https://api.exchanger.sy/en/docs)
+- [التوثيق بالعربية](https://api.exchanger.sy/ar/docs)
+- [Developer console](https://api.exchanger.sy/console?lang=en)
+- [Telegram support](https://t.me/api365)
