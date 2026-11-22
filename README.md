@@ -40,6 +40,14 @@ curl 'https://api.exchanger.sy/api/v1/currencies/USD' \
   -H 'Accept: application/json'
 ```
 
+To request prices in the new Syrian pound for this call, add `denomination=new`:
+
+```bash
+curl 'https://api.exchanger.sy/api/v1/currencies/USD?denomination=new' \
+  -H 'X-API-Key: syp_YOUR_KEY' \
+  -H 'Accept: application/json'
+```
+
 ## Endpoints
 
 | Endpoint | Description |
@@ -54,6 +62,8 @@ curl 'https://api.exchanger.sy/api/v1/currencies/USD' \
 | `GET /api/v1/history` | Accepted changes for one currency or gold karat |
 
 Collection endpoints return arrays in `data`. A single-item endpoint returns an object. The combined `/rates` endpoint returns a `data` object with `currencies`, `gold`, and `energy` arrays. A hidden item is not listed; a request for its code returns `404`.
+
+Every endpoint accepts the optional `denomination` query parameter, including `/history`. It controls the SYP values in that response only; see [Display units and timestamps](#display-units-and-timestamps).
 
 ### Response format
 
@@ -120,7 +130,22 @@ GET /api/v1/history?type=currency&code=USD&from=2026-09-01T00:00:00Z&to=2026-09-
 
 ## Display units and timestamps
 
-The service administrator sets the display denomination and decimal precision for all clients. `meta.denomination` is `old` or `new`; **one new SYP equals 100 old SYP**. `meta.round` indicates the number of decimal places, from `0` to `6`. Request parameters named `denomination` or `round` are not supported.
+Choose how SYP amounts are displayed with an optional query parameter:
+
+| Query parameter | SYP amounts returned |
+| --- | --- |
+| Omitted | The default selected by the service administrator |
+| `denomination=old` | Old Syrian pounds |
+| `denomination=new` | New Syrian pounds; the old-pound amount divided by 100 |
+
+This applies to currency and gold `buy`/`sell` values, energy `price_syp`, and historical prices. It does not change USD amounts. `meta.denomination` reports the unit actually used, including when the parameter is omitted. The administrator sets decimal precision from `0` to `6`, reported as `meta.round`; requests cannot override it.
+
+The parameter name `Denomination` is also accepted. Send it only once, using either spelling, with exactly `old` or `new`. An invalid or duplicate value returns `400`.
+
+```text
+GET /api/v1/currencies/USD?denomination=new
+GET /api/v1/rates?Denomination=old
+```
 
 Response timestamps are Unix **seconds** in UTC, or `null`. Convert them to the user's preferred time zone in your application. History request parameters `from` and `to` remain ISO 8601 timestamps.
 
@@ -152,6 +177,10 @@ Use the HTTP status first, then `error.code` for application-specific handling. 
 ## Further information
 
 - [English API documentation](https://api.exchanger.sy/en/docs)
+- [التوثيق بالعربية](https://api.exchanger.sy/ar/docs)
+- [Developer console](https://api.exchanger.sy/console?lang=en)
+- [Telegram support](https://t.me/api365)
+
 - [التوثيق بالعربية](https://api.exchanger.sy/ar/docs)
 - [Developer console](https://api.exchanger.sy/console?lang=en)
 - [Telegram support](https://t.me/api365)
